@@ -2,7 +2,7 @@ int state = 0; //0: 시작 전 대기상태, 1: 내려가고있는 중, 2: 정�
 int button_pin[4] = {10, 11, 12, 13};
 
 float contact_voltage=0.0;//TODO -> 컨택 볼티지 찾아야함. 이 값 이하면 접촉했다고 판단함.
-float dropoff_voltage=0.0//TODO -> 드롭옾 볼티지 찾아야함. 이 값 이상이면 완료되었다고 판단함.
+float dropoff_voltage=0.0;//TODO -> 드롭옾 볼티지 찾아야함. 이 값 이상이면 완료되었다고 판단함.
 ///////these lines are for debouncing buttons///////////
 boolean last_button_state[4] = {0, 0, 0, 0};
 boolean button_state[4] = {0, 0, 0, 0};
