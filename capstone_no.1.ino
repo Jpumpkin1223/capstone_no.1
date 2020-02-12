@@ -16,12 +16,12 @@ void setup() {
 }
 
 void loop() {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {//버튼 눌렸는지 체크하는 부분
     debouncing_button(i);
-
-    delay(10);
   }
-
+  float voltage = analogRead(A0) * 25 / 1023; //볼티지 센서 측정 전압값
+  Serial.println(voltage);
+  delay(200);
   /* switch (state) {
      case label1:
        // statements
