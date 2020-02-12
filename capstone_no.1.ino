@@ -1,5 +1,5 @@
 int state=0; //0: 시작 전 대기상태, 1: 내려가고있는 중, 2: 정지 후 대기, 3: 다 되서 올라가는 중
-int switch_pin[3]=[7,8,9];
+int switch_pin[3]={7,8,9};
 
 
 void setup() {
@@ -11,5 +11,16 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  switch (state) {
+  case label1:
+    // statements
+    break;
+  case label2:
+    // statements
+    break;
+  default:
+    // statements
+    break;
+}
 
 }
