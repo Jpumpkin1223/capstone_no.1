@@ -13,7 +13,7 @@ boolean button_queue[4] = {0, 0, 0, 0};
 unsigned long last_debounce[4] = {0, 0, 0, 0};
 const int debounce_delay = 50;
 /////////////////////////////////////////////////////////
-int scheduler(int i)
+int scheduler(int);
 int state0();
 int state1();
 int state2();
