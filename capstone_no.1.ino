@@ -9,10 +9,12 @@ float start_voltage; //start 버튼 눌렀을때의 voltage 기록함.
 ///////these lines are for debouncing buttons///////////
 boolean last_button_state[4] = {0, 0, 0, 0};
 boolean button_state[4] = {0, 0, 0, 0};
+boolean button_queue[4] = {0, 0, 0, 0};
 unsigned long last_debounce[4] = {0, 0, 0, 0};
 const int debounce_delay = 50;
 /////////////////////////////////////////////////////////
 int scheduler(int i)
+int state0();
 int state1();
 int state2();
 int state3();
@@ -31,27 +33,24 @@ void loop() {
   for (int i = 0; i < 4; i++) {//버튼 눌렸는지 체크하는 부분
     debouncing_button(i);
   }
-
-  float voltage = analogRead(A0) * 25 / 1023; //볼티지 센서 측정 전압값
-  Serial.println(voltage);
-  delay(200);
-  scheduler(state);
-  /* switch (state) {
-     case label1:
-       // statements
-       break;
-     case label2:
-       // statements
-       break;
-     default:
-       // statements
-       break;
-    }*/
+  // float voltage = analogRead(A0) * 25 / 1023; //볼티지 센서 측정 전압값
+  // Serial.println(voltage);
+  if(scheduler(state)){ //state 에 따라 작업을 할당하는 부분, 작업 끝나면 state +1
+    state++;
+    if(state == 5){
+      state = 0;
+    }
+  }
+  delay(20);
 
 }
+
 int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
-  int done = 0;
+  int done = 0; //  state 작업이 다 끝났는지 확인하는 변수
     switch (i) {
+      case 0:
+        done = state1();
+        break;
       case 1:
         done = state1();
         break;
@@ -70,14 +69,26 @@ int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
   return done;
 
 }
+int state0() { // state 0 : 시작하기 전에 대기하는 state
+  if (button_queue[0] = HIGH) { //버튼 눌려있으면
+    start_voltage = analogRead(A0) * 25 / 1023; //현재 볼트 확인
+    button_queue[0] = LOW; //큐에서 빼주고
+    return 1; //state 벗어나기 위해 1 return
+  }
+
+  else { //버튼 안눌렸으면 버튼 눌릴 것 대기
+    return 0;
+  }
+
+}
+
 int state1() { // state 1 : 내려가는 부분
   float voltage = analogRead(A0) * 25 / 1023; //현재 볼트 확인
   if (voltage < start_voltage * contact_coefficient) { //볼트가 컨택보다 작아지면 접촉했겠죠?
     return 1; //state 벗어나기 위해 1 return
-
   }
   else { //접촉하기 전이면
-    // TODO 한스텝 내려가는 동작
+    // TODO 
     step_count++; //내려간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
     return 0;
@@ -87,7 +98,7 @@ int state1() { // state 1 : 내려가는 부분
 
 int state2() { // state 2 : 2미리 내려가는 중
   for (i=0; i<100; i++){// TODO 내려가야하는 step 수 계산
-    // TODO 내려가는 코드
+    // TODO 한스텝 내려가는 동작
     step_count++; //내려간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
   }
@@ -99,10 +110,8 @@ int state3() { // state 3 : 엣칭완료 기다리는 중
   float voltage = analogRead(A0) * 25 / 1023; //현재 볼트 확인
   if (voltage > start_voltage * dropoff_coefficient) { //볼트가 초기볼트로 돌아오면 끊긴 것, dropoff_coefficient로 safety margin
     return 1; //state 벗어나기 위해 1 return
-
   }
-  else {
-    delay(100);
+  else { //아니면 그냥 기다리기
     return 0;
   }
 
@@ -114,7 +123,6 @@ int state4() { // state 4 : 올라가는 중
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
   }
   return 1; //state 벗어나기 위해 1 return
-
 }
 
 ///////////// 버튼 인식 부분 (debouncing) ////////////////
@@ -127,6 +135,7 @@ void debouncing_button(int i) {
     if (reading != button_state[i]) { //state와 상태가 다를경우 기록
       button_state[i] = reading;
       if (button_state[i] == LOW) { //LOW일때 작업 할당 -> pull-up 저항있음
+        button_queue[i] = HIGH;
         Serial.print(i + 1); //몇번째(1번 부터) 버튼 눌렸는지 체크하는
         Serial.println(" button pressed");
       }
