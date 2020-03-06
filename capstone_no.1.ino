@@ -35,9 +35,9 @@ void loop() {
   }
   // float voltage = analogRead(A0) * 25 / 1023; //볼티지 센서 측정 전압값
   // Serial.println(voltage);
-  if(scheduler(state)){ //state 에 따라 작업을 할당하는 부분, 작업 끝나면 state +1
+  if (scheduler(state)) { //state 에 따라 작업을 할당하는 부분, 작업 끝나면 state +1
     state++;
-    if(state == 5){
+    if (state == 5) {
       state = 0;
     }
   }
@@ -47,24 +47,24 @@ void loop() {
 
 int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
   int done = 0; //  state 작업이 다 끝났는지 확인하는 변수
-    switch (i) {
-      case 0:
-        done = state1();
-        break;
-      case 1:
-        done = state1();
-        break;
-      case 2:
-        done = state2();
-        break;
-      case 3:
-        done = state3();
-        break;
-      case 4:
-        done = state4();
-        break;
-      default:
-        break;
+  switch (i) {
+    case 0:
+      done = state1();
+      break;
+    case 1:
+      done = state1();
+      break;
+    case 2:
+      done = state2();
+      break;
+    case 3:
+      done = state3();
+      break;
+    case 4:
+      done = state4();
+      break;
+    default:
+      break;
   }
   return done;
 
@@ -88,7 +88,7 @@ int state1() { // state 1 : 내려가는 부분
     return 1; //state 벗어나기 위해 1 return
   }
   else { //접촉하기 전이면
-    // TODO 
+    // TODO
     step_count++; //내려간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
     return 0;
@@ -97,7 +97,7 @@ int state1() { // state 1 : 내려가는 부분
 }
 
 int state2() { // state 2 : 2미리 내려가는 중
-  for (i=0; i<100; i++){// TODO 내려가야하는 step 수 계산
+  for (int i = 0; i < 100; i++) { // TODO 내려가야하는 step 수 계산
     // TODO 한스텝 내려가는 동작
     step_count++; //내려간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
@@ -117,7 +117,7 @@ int state3() { // state 3 : 엣칭완료 기다리는 중
 
 }
 int state4() { // state 4 : 올라가는 중
-  while(step_count > 0){
+  while (step_count > 0) {
     // TODO 내려가는 코드
     step_count--; //올라간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
