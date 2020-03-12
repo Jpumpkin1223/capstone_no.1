@@ -16,6 +16,7 @@ const int debounce_delay = 50;
 ///////////these lines are for step motor////////////////
 const int stepsPerRevolution = 200;  // 42각 모터사용 200step 한바퀴 => 4mm 이동
 Stepper myStepper(stepsPerRevolution, 4, 5, 6, 7);//4,5,6,7번핀 모터구동핀으로 사용
+int one_step = 5; // 5step = 0.1mm
 /////////////////////////////////////////////////////////
 int scheduler(int);
 int state0();
@@ -93,7 +94,7 @@ int state1() { // state 1 : 내려가는 부분
     return 1; //state 벗어나기 위해 1 return
   }
   else { //접촉하기 전이면
-    // TODO
+     myStepper.step(one_step);
     step_count++; //내려간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
     return 0;
@@ -102,8 +103,8 @@ int state1() { // state 1 : 내려가는 부분
 }
 
 int state2() { // state 2 : 2미리 내려가는 중
-  for (int i = 0; i < 100; i++) { // TODO 내려가야하는 step 수 계산
-    // TODO 한스텝 내려가는 동작
+  for (int i = 0; i < 20; i++) { 
+    myStepper.step(one_step);
     step_count++; //내려간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
   }
@@ -123,7 +124,7 @@ int state3() { // state 3 : 엣칭완료 기다리는 중
 }
 int state4() { // state 4 : 올라가는 중
   while (step_count > 0) {
-    // TODO 내려가는 코드
+    myStepper.step(-5);
     step_count--; //올라간거 기록
     delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
   }
