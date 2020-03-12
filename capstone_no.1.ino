@@ -96,7 +96,7 @@ int state1() { // state 1 : 내려가는 부분
   else { //접촉하기 전이면
      myStepper.step(one_step);
     step_count++; //내려간거 기록
-    delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
+    delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
     return 0;
   }
 
@@ -106,7 +106,7 @@ int state2() { // state 2 : 2미리 내려가는 중
   for (int i = 0; i < 20; i++) { 
     myStepper.step(one_step);
     step_count++; //내려간거 기록
-    delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
+    delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
   }
   return 1; //state 벗어나기 위해 1 return
 
@@ -126,7 +126,7 @@ int state4() { // state 4 : 올라가는 중
   while (step_count > 0) {
     myStepper.step(-5);
     step_count--; //올라간거 기록
-    delay(10); //TODO 내려가는 스텝에 맞게 시간 조정
+    delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
   }
   return 1; //state 벗어나기 위해 1 return
 }
