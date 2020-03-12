@@ -1,4 +1,5 @@
 //
+#include <Stepper.h>
 int state = 0; //0: 시작 전 대기상태, 1: 내려가고있는 중, 2: 2미리 더 담그는 중 3: 정지 후 대기, 4: 엣칭 작업이 끝나고 올라가는 중
 int button_pin[4] = {10, 11, 12, 13};
 int step_count = 0;
@@ -12,6 +13,9 @@ boolean button_state[4] = {0, 0, 0, 0};
 boolean button_queue[4] = {0, 0, 0, 0};
 unsigned long last_debounce[4] = {0, 0, 0, 0};
 const int debounce_delay = 50;
+///////////these lines are for step motor////////////////
+const int stepsPerRevolution = 200;  // 42각 모터사용 200step 한바퀴 => 4mm 이동
+Stepper myStepper(stepsPerRevolution, 4, 5, 6, 7);//4,5,6,7번핀 모터구동핀으로 사용
 /////////////////////////////////////////////////////////
 int scheduler(int);
 int state0();
@@ -27,6 +31,7 @@ void setup() {
   for (int i = 1; i < 4; i++) { //버튼 핀 4개 인풋 활성화
     pinMode(button_pin[i], INPUT);
   }
+  myStepper.setSpeed(60);//스텝모터 60rpm으로 지정
 }
 
 void loop() {
