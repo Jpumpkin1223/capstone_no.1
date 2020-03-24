@@ -124,7 +124,7 @@ int state3() { // state 3 : 엣칭완료 기다리는 중
 }
 int state4() { // state 4 : 올라가는 중
   while (step_count > 0) {
-    myStepper.step(-5);
+    myStepper.step(-one_step);
     step_count--; //올라간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
   }
