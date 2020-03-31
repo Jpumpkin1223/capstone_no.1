@@ -1,4 +1,4 @@
-//
+////////////////////////////////////////////////////////
 #include <Stepper.h>
 int state = 0; //0: 시작 전 대기상태, 1: 내려가고있는 중, 2: 2미리 더 담그는 중 3: 정지 후 대기, 4: 엣칭 작업이 끝나고 올라가는 중
 int button_pin[4] = {10, 11, 12, 13};
@@ -17,6 +17,8 @@ const int debounce_delay = 50;
 const int stepsPerRevolution = 200;  // 42각 모터사용 200step 한바퀴 => 4mm 이동
 Stepper myStepper(stepsPerRevolution, 4, 5, 6, 7);//4,5,6,7번핀 모터구동핀으로 사용
 int one_step = 5; // 5step = 0.1mm
+///////////these line is for PWM control/////////////////
+unsigned int PWM_duty_ratio;
 /////////////////////////////////////////////////////////
 int scheduler(int);
 int state0();
@@ -26,13 +28,27 @@ int state3();
 int state4();
 void debouncing_button(int);
 
-
 void setup() {
+  
   Serial.begin(115200);
+  
+  //////////////Activate input buttons//////////////////////
   for (int i = 1; i < 4; i++) { //버튼 핀 4개 인풋 활성화
     pinMode(button_pin[i], INPUT);
   }
+  
+  //////////////Set the RPM of Step motor///////////////////
   myStepper.setSpeed(60);//스텝모터 60rpm으로 지정
+  
+  //////////////Control PWM of the voltage//////////////////
+  pinMode   (6, OUTPUT);
+  TCCR0A  = (1 << WGM01) | (1 << WGM00); // FastPWM mode
+  TCCR0A |= (1 << COM0A1);        // non-inverting
+  TCCR0B  = (1 << CS02) | (1 << CS00); // prescaler 1024
+  TIMSK0 |= (1 << TOIE0);
+  OCR0A   = 50;
+  PWM_duty_ratio = OCR0A * 100 / 256;
+  sei();
 }
 
 void loop() {
