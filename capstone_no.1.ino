@@ -39,9 +39,9 @@ void setup() {
   
   //////////////Set the RPM of Step motor///////////////////
   myStepper.setSpeed(60);//스텝모터 60rpm으로 지정
-  
+  /*
   //////////////Control PWM of the voltage//////////////////
-  pinMode   (6, OUTPUT);
+  pinMode   (3, OUTPUT);
   TCCR0A  = (1 << WGM01) | (1 << WGM00); // FastPWM mode
   TCCR0A |= (1 << COM0A1);        // non-inverting
   TCCR0B  = (1 << CS02) | (1 << CS00); // prescaler 1024
@@ -49,14 +49,15 @@ void setup() {
   OCR0A   = 50;
   PWM_duty_ratio = OCR0A * 100 / 256;
   sei();
+  */
 }
 
 void loop() {
   for (int i = 0; i < 4; i++) {//버튼 눌렸는지 체크하는 부분
     debouncing_button(i);
   }
-  // float voltage = analogRead(A0) * 25 / 1023; //볼티지 센서 측정 전압값
-  // Serial.println(voltage);
+  float voltage = analogRead(A0) * 25 / 1023; //볼티지 센서 측정 전압값
+  Serial.println(voltage);
   if (scheduler(state)) { //state 에 따라 작업을 할당하는 부분, 작업 끝나면 state +1
     state++;
     if (state == 5) {
