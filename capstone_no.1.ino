@@ -48,7 +48,7 @@ void setup() {
   }
 
   //////////////Set the RPM of Step motor///////////////////
-  //myStepper.setSpeed(60);//스텝모터 60rpm으로 지정//여기서 오류가 생기는 지 의심 스러움
+  myStepper.setSpeed(60);//스텝모터 60rpm으로 지정//여기서 오류가 생기는 지 의심 스러움
   /*
     //////////////Control PWM of the voltage//////////////////
     pinMode   (3, OUTPUT);
@@ -82,7 +82,7 @@ int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
   int done = 0; //  state 작업이 다 끝났는지 확인하는 변수
   switch (i) {
     case 0:
-      done = state1();
+      done = state0();
       break;
     case 1:
       done = state1();
@@ -103,6 +103,7 @@ int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
 
 }
 int state0() { // state 0 : 시작하기 전에 대기하는 state
+  Serial.println("STATE0");
   if (button_queue[4] = HIGH) { //버튼 눌려있으면
     start_voltage = analogRead(A0) * 25 / 1024; //현재 볼트 확인
     button_queue[4] = LOW; //큐에서 빼주고
@@ -110,7 +111,6 @@ int state0() { // state 0 : 시작하기 전에 대기하는 state
   }
 
   else { //버튼 안눌렸으면 버튼 눌릴 것 대기
-    myStepper.setSpeed(0);
     myStepper.step(0);
     delay(50);
     return 0;
@@ -119,12 +119,12 @@ int state0() { // state 0 : 시작하기 전에 대기하는 state
 }
 
 int state1() { // state 1 : 내려가는 부분
+  Serial.println("STATE1");
   float voltage1 = analogRead(A0) * 25 / 1024; //현재 볼트 확인
   if (voltage1 < start_voltage * contact_coefficient) { //볼트가 컨택보다 작아지면 접촉했겠죠?
     return 1; //state 벗어나기 위해 1 return
   }
   else { //접촉하기 전이면
-    myStepper.setSpeed(60);
     myStepper.step(one_step);
     step_count++; //내려간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
@@ -134,8 +134,8 @@ int state1() { // state 1 : 내려가는 부분
 }
 
 int state2() { // state 2 : 2미리 내려가는 중
+  Serial.println("STATE2");
   for (int i = 0; i < 20; i++) {
-    myStepper.setSpeed(60);
     myStepper.step(one_step);
     step_count++; //내려간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
@@ -145,22 +145,21 @@ int state2() { // state 2 : 2미리 내려가는 중
 }
 
 int state3() { // state 3 : 엣칭완료 기다리는 중
+  Serial.println("STATE3");
   float voltage3 = analogRead(A0) * 25 / 1024; //현재 볼트 확인
   if (voltage3 > start_voltage * dropoff_coefficient) { //볼트가 초기볼트로 돌아오면 끊긴 것, dropoff_coefficient로 safety margin
-    myStepper.setSpeed(60);
     myStepper.step(0);
     return 1; //state 벗어나기 위해 1 return
   }
   else { //아니면 그냥 기다리기
-    myStepper.setSpeed(60);
     myStepper.step(0);
     return 0;
   }
 
 }
 int state4() { // state 4 : 올라가는 중
+  Serial.println("STATE4");
   while (step_count > 0) {
-    myStepper.setSpeed(60);
     myStepper.step(-one_step);
     step_count--; //올라간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
