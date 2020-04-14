@@ -7,7 +7,7 @@ int step_count = 0;
 
 //////////these lines are for voltage check/////////////
 float contact_coefficient = 0.65; //TODO -> 컨택 비율 찾아야함. 이 비율 이하면 접촉했다고 판단함.
-float dropoff_coefficient = 0.9; //TODO -> 드롭옾 비율 찾아야함. 이 비율 이상이면 완료되었다고 판단함.
+float dropoff_coefficient = 0.99; //TODO -> 드롭옾 비율 찾아야함. 이 비율 이상이면 완료되었다고 판단함.
 float start_voltage; //start 버튼 눌렀을때의 voltage 기록함.
 
 
@@ -23,11 +23,6 @@ const int debounce_delay = 50;
 const int stepsPerRevolution = 200;  // 42각 모터사용 200step 한바퀴 => 4mm 이동
 Stepper myStepper(stepsPerRevolution, 4, 5, 6, 7);//4,5,6,7번핀 모터구동핀으로 사용
 int one_step = 5; // 5step = 0.1mm
-
-
-///////////these line is for PWM control/////////////////
-unsigned int PWM_duty_ratio;
-
 
 /////////////////////////////////////////////////////////
 int scheduler(int);
@@ -49,28 +44,18 @@ void setup() {
 
   //////////////Set the RPM of Step motor///////////////////
   myStepper.setSpeed(60);//스텝모터 60rpm으로 지정
-  /*
-    //////////////Control PWM of the voltage//////////////////
-    pinMode   (3, OUTPUT);
-    TCCR0A  = (1 << WGM01) | (1 << WGM00); // FastPWM mode
-    TCCR0A |= (1 << COM0A1);        // non-inverting
-    TCCR0B  = (1 << CS02) | (1 << CS00); // prescaler 1024
-    TIMSK0 |= (1 << TOIE0);
-    OCR0A   = 50;
-    PWM_duty_ratio = OCR0A * 100 / 256;
-    sei();
-  */
+
 }
 
 void loop() {
   for (int i = 0; i < 4; i++) {//버튼 눌렸는지 체크하는 부분
     debouncing_button(i);
   }
-  float voltage = analogRead(A0) * 25 / 1024; //볼티지 센서 측정 전압값
-  //Serial.println(voltage, 2);
-  if (scheduler(state)==1) { //state 에 따라 작업을 할당하는 부분, 작업 끝나면 state +1
+  //float voltage = analogRead(A0) * 25.00 / 1024.00; //볼티지 센서 측정 전압값
+  //Serial.println(voltage, 4);
+  if (scheduler(state) == 1) { //state 에 따라 작업을 할당하는 부분, 작업 끝나면 state +1
     state++;
-    
+
     if (state == 5) {
       state = 0;
     }
@@ -105,16 +90,17 @@ int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
 }
 int state0() { // state 0 : 시작하기 전에 대기하는 state
   
+  //Serial.println("STATE0");
+
   if (digitalRead(10) == LOW) { //버튼 눌려있으면
-    start_voltage = analogRead(A0) * 25 / 1024; //현재 볼트 확인
-    //button_queue[1] = LOW; //큐에서 빼주고 위아래(여기 바꿔봅시다)
+    start_voltage = analogRead(A0) * 25.00 / 1024.00; //현재 볼트 확인
+    Serial.println(start_voltage,4);
     Serial.println("STATE1");
     return 1; //state 벗어나기 위해 1 return
   }
 
   else { //버튼 안눌렸으면 버튼 눌릴 것 대기
     myStepper.step(0);
-    Serial.println("STATE0");
     delay(50);
     return 0;
   }
@@ -122,8 +108,8 @@ int state0() { // state 0 : 시작하기 전에 대기하는 state
 }
 
 int state1() { // state 1 : 내려가는 부분
-  
-  float voltage1 = analogRead(A0) * 25 / 1024; //현재 볼트 확인
+
+  float voltage1 = analogRead(A0) * 25.00 / 1024.00; //현재 볼트 확인
   if (voltage1 < start_voltage * contact_coefficient) { //볼트가 컨택보다 작아지면 접촉했겠죠?
     Serial.println("STATE2");
     return 1; //state 벗어나기 위해 1 return
@@ -138,7 +124,7 @@ int state1() { // state 1 : 내려가는 부분
 }
 
 int state2() { // state 2 : 2미리 내려가는 중
-  
+
   for (int i = 0; i < 20; i++) {
     myStepper.step(one_step);
     step_count++; //내려간거 기록
@@ -150,8 +136,8 @@ int state2() { // state 2 : 2미리 내려가는 중
 }
 
 int state3() { // state 3 : 엣칭완료 기다리는 중
-  
-  float voltage3 = analogRead(A0) * 25 / 1024; //현재 볼트 확인
+
+  float voltage3 = analogRead(A0) * 25.00 / 1024.00; //현재 볼트 확인
   if (voltage3 > start_voltage * dropoff_coefficient) { //볼트가 초기볼트로 돌아오면 끊긴 것, dropoff_coefficient로 safety margin
     myStepper.step(0);
     Serial.println("STATE4");
@@ -164,7 +150,7 @@ int state3() { // state 3 : 엣칭완료 기다리는 중
 
 }
 int state4() { // state 4 : 올라가는 중
-  
+
   while (step_count > 0) {
     myStepper.step(-one_step);
     step_count--; //올라간거 기록
