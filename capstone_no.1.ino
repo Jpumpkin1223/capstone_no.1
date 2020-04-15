@@ -23,7 +23,10 @@ const int debounce_delay = 50;
 ///////////these lines are for step motor////////////////
 const int stepsPerRevolution = 200;  // 42각 모터사용 200step 한바퀴 => 4mm 이동
 Stepper myStepper(stepsPerRevolution, 4, 5, 6, 7);//4,5,6,7번핀 모터구동핀으로 사용
-int one_step = 5; // 5step = 0.1mm
+int one_step = -5; // 5step = 0.1mm
+
+///////////these line is for PWM control/////////////////
+unsigned int PWM_duty_ratio;
 
 /////////////////////////////////////////////////////////
 int scheduler(int);
@@ -45,6 +48,17 @@ void setup() {
 
   //////////////Set the RPM of Step motor///////////////////
   myStepper.setSpeed(60);//스텝모터 60rpm으로 지정
+ /*
+  //////////////Control PWM of the voltage//////////////////
+  pinMode   (3, OUTPUT);
+  TCCR0A  = (1 << WGM01) | (1 << WGM00); // FastPWM mode
+  TCCR0A |= (1 << COM0A1);        // non-inverting
+  TCCR0B  = (1 << CS02) | (1 << CS00); // prescaler 1024
+  TIMSK0 |= (1 << TOIE0);
+  OCR0A   = 50;
+  PWM_duty_ratio = OCR0A * 100 / 256;
+  sei();
+ */
 
 }
 
