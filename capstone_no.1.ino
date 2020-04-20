@@ -4,11 +4,12 @@
 int state = 0; //0: 시작 전 대기상태, 1: 내려가고있는 중, 2: 2미리 더 담그는 중 3: 정지 후 대기, 4: 엣칭 작업이 끝나고 올라가는 중
 int button_pin[4] = {10, 11, 12, 13};
 int step_count = 0;
-
+//////////////////////////전압 차단//////////////////////
+int onstage_3 = 2;
 
 //////////these lines are for voltage check/////////////
-float contact_coefficient = 0.65; //TODO -> 컨택 비율 찾아야함. 이 비율 이하면 접촉했다고 판단함.
-float dropoff_coefficient = 0.99; //TODO -> 드롭옾 비율 찾아야함. 이 비율 이상이면 완료되었다고 판단함.
+float contact_coefficient = 0.80; //TODO -> 컨택 비율 찾아야함. 이 비율 이하면 접촉했다고 판단함.
+float dropoff_coefficient = 0.98; //TODO -> 드롭옾 비율 찾아야함. 이 비율 이상이면 완료되었다고 판단함.
 float start_voltage; //start 버튼 눌렀을때의 voltage 기록함.
 
 
@@ -45,20 +46,23 @@ void setup() {
   for (int i = 1; i < 4; i++) { //버튼 핀 4개 인풋 활성화
     pinMode(button_pin[i], INPUT);
   }
-
+  
+  //////////////////////////State 4 current cut/////////////
+  pinMode(onstage_3, OUTPUT);
+  
   //////////////Set the RPM of Step motor///////////////////
   myStepper.setSpeed(60);//스텝모터 60rpm으로 지정
- /*
-  //////////////Control PWM of the voltage//////////////////
-  pinMode   (3, OUTPUT);
-  TCCR0A  = (1 << WGM01) | (1 << WGM00); // FastPWM mode
-  TCCR0A |= (1 << COM0A1);        // non-inverting
-  TCCR0B  = (1 << CS02) | (1 << CS00); // prescaler 1024
-  TIMSK0 |= (1 << TOIE0);
-  OCR0A   = 50;
-  PWM_duty_ratio = OCR0A * 100 / 256;
-  sei();
- */
+  /*
+    //////////////Control PWM of the voltage//////////////////
+    pinMode   (3, OUTPUT);
+    TCCR0A  = (1 << WGM01) | (1 << WGM00); // FastPWM mode
+    TCCR0A |= (1 << COM0A1);        // non-inverting
+    TCCR0B  = (1 << CS02) | (1 << CS00); // prescaler 1024
+    TIMSK0 |= (1 << TOIE0);
+    OCR0A   = 50;
+    PWM_duty_ratio = OCR0A * 100 / 256;
+    sei();
+  */
 
 }
 
@@ -104,12 +108,12 @@ int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
 
 }
 int state0() { // state 0 : 시작하기 전에 대기하는 state
-  
+
   //Serial.println("STATE0");
 
   if (digitalRead(10) == LOW) { //버튼 눌려있으면
     start_voltage = analogRead(A0) * 25.00 / 1024.00; //현재 볼트 확인
-    Serial.println(start_voltage,4);
+    Serial.println(start_voltage, 4);
     Serial.println("STATE1");
     return 1; //state 벗어나기 위해 1 return
   }
@@ -155,6 +159,7 @@ int state3() { // state 3 : 엣칭완료 기다리는 중
   float voltage3 = analogRead(A0) * 25.00 / 1024.00; //현재 볼트 확인
   if (voltage3 > start_voltage * dropoff_coefficient) { //볼트가 초기볼트로 돌아오면 끊긴 것, dropoff_coefficient로 safety margin
     myStepper.step(0);
+    digitalWrite(onstage_3, HIGH);
     Serial.println("STATE4");
     return 1; //state 벗어나기 위해 1 return
   }
