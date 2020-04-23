@@ -4,11 +4,11 @@
 int state = 0; //0: 시작 전 대기상태, 1: 내려가고있는 중, 2: 2미리 더 담그는 중 3: 정지 후 대기, 4: 엣칭 작업이 끝나고 올라가는 중
 int button_pin[4] = {10, 11, 12, 13};
 int step_count = 0;
-//////////////////////////전압 차단//////////////////////
+////////////////////////////전압 차단//////////////////////
 int onstage_3 = 2;
 
 //////////these lines are for voltage check/////////////
-float contact_coefficient = 0.80; //TODO -> 컨택 비율 찾아야함. 이 비율 이하면 접촉했다고 판단함.
+float contact_coefficient = 0.96; //TODO -> 컨택 비율 찾아야함. 이 비율 이하면 접촉했다고 판단함.
 float dropoff_coefficient = 0.98; //TODO -> 드롭옾 비율 찾아야함. 이 비율 이상이면 완료되었다고 판단함.
 float start_voltage; //start 버튼 눌렀을때의 voltage 기록함.
 
@@ -24,7 +24,7 @@ const int debounce_delay = 50;
 ///////////these lines are for step motor////////////////
 const int stepsPerRevolution = 200;  // 42각 모터사용 200step 한바퀴 => 4mm 이동
 Stepper myStepper(stepsPerRevolution, 4, 5, 6, 7);//4,5,6,7번핀 모터구동핀으로 사용
-int one_step = -5; // 5step = 0.1mm
+int one_step = -2; // 5step = 0.04mm
 
 ///////////these line is for PWM control/////////////////
 unsigned int PWM_duty_ratio;
@@ -135,6 +135,7 @@ int state1() { // state 1 : 내려가는 부분
   }
   else { //접촉하기 전이면
     myStepper.step(one_step);
+    Serial.println(voltage1, 4);
     step_count++; //내려간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
     return 0;
@@ -144,7 +145,7 @@ int state1() { // state 1 : 내려가는 부분
 
 int state2() { // state 2 : 2미리 내려가는 중
 
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 50; i++) {
     myStepper.step(one_step);
     step_count++; //내려간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
