@@ -46,10 +46,10 @@ void setup() {
   for (int i = 1; i < 4; i++) { //버튼 핀 4개 인풋 활성화
     pinMode(button_pin[i], INPUT);
   }
-  
+
   //////////////////////////State 4 current cut/////////////
   pinMode(onstage_3, OUTPUT);
-  
+
   //////////////Set the RPM of Step motor///////////////////
   myStepper.setSpeed(60);//스텝모터 60rpm으로 지정
   /*
@@ -110,7 +110,8 @@ int scheduler(int i) { //현재 state에 따라 알맞은 작업 할당
 int state0() { // state 0 : 시작하기 전에 대기하는 state
 
   //Serial.println("STATE0");
-
+  float voltage = analogRead(A0) * 25.00 / 1024.00; //볼티지 센서 측정 전압값
+  
   if (digitalRead(10) == LOW) { //버튼 눌려있으면
     start_voltage = analogRead(A0) * 25.00 / 1024.00; //현재 볼트 확인
     Serial.println(start_voltage, 4);
@@ -119,6 +120,7 @@ int state0() { // state 0 : 시작하기 전에 대기하는 state
   }
 
   else { //버튼 안눌렸으면 버튼 눌릴 것 대기
+    Serial.println(voltage, 4);
     myStepper.step(0);
     delay(50);
     return 0;
