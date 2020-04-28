@@ -112,7 +112,20 @@ int state0() { // state 0 : 시작하기 전에 대기하는 state
   //Serial.println("STATE0");
   float voltage = analogRead(A0) * 25.00 / 1024.00; //볼티지 센서 측정 전압값
 
-  if (digitalRead(10) == LOW) { //버튼 눌려있으면
+  if(digitalRead(11) == LOW){
+    myStepper.step(-500); //1cm 아래로 이동
+    delay(50);
+    return 0;
+  }
+
+
+  else if(digitalRead(12) == LOW){
+    myStepper.step(500); //1cm 위로 이동
+    delay(50);
+    return 0;
+  }
+  
+  else if (digitalRead(10) == LOW) { //버튼 눌려있으면
     start_voltage = analogRead(A0) * 25.00 / 1024.00; //현재 볼트 확인
     Serial.println(start_voltage, 4);
     Serial.println("STATE1");
@@ -137,7 +150,7 @@ int state1() { // state 1 : 내려가는 부분
   }
   else { //접촉하기 전이면
     myStepper.step(one_step);
-    Serial.println(voltage1, 4);
+    //Serial.println(voltage1, 4);
     step_count++; //내려간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
     return 0;
