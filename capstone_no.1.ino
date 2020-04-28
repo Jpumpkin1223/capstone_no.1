@@ -8,8 +8,8 @@ int step_count = 0;
 int onstage_3 = 2;
 
 //////////these lines are for voltage check/////////////
-float contact_coefficient = 0.98; //TODO -> 컨택 비율 찾아야함. 이 비율 이하면 접촉했다고 판단함.
-float dropoff_coefficient = 0.98; //TODO -> 드롭옾 비율 찾아야함. 이 비율 이상이면 완료되었다고 판단함.
+float contact_coefficient = 0.96; //TODO -> 컨택 비율 찾아야함. 이 비율 이하면 접촉했다고 판단함.
+float dropoff_coefficient = 0.99; //TODO -> 드롭옾 비율 찾아야함. 이 비율 이상이면 완료되었다고 판단함.
 float start_voltage; //start 버튼 눌렀을때의 voltage 기록함.
 
 
@@ -70,8 +70,8 @@ void loop() {
   for (int i = 0; i < 4; i++) {//버튼 눌렸는지 체크하는 부분
     debouncing_button(i);
   }
-  float voltage = analogRead(A0) * 25.00 / 1024.00; //볼티지 센서 측정 전압값
-  Serial.println(voltage, 4);
+  //float voltage = analogRead(A0) * 25.00 / 1024.00; //볼티지 센서 측정 전압값
+  //Serial.println(voltage, 4);
   if (scheduler(state) == 1) { //state 에 따라 작업을 할당하는 부분, 작업 끝나면 state +1
     state++;
 
@@ -133,7 +133,7 @@ int state0() { // state 0 : 시작하기 전에 대기하는 state
   }
 
   else { //버튼 안눌렸으면 버튼 눌릴 것 대기
-    Serial.println(voltage, 4);
+    //Serial.println(voltage, 4);
     myStepper.step(0);
     delay(50);
     return 0;
@@ -161,14 +161,16 @@ int state1() { // state 1 : 내려가는 부분
 int state2() { // state 2 : 2미리 내려가는 중
 
   /*
-   for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 50; i++) {
     myStepper.step(one_step);
     step_count++; //내려간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
-  }
+    }
   */
-  myStepper.step(one_step*50);
+  myStepper.step(one_step * 50); //2mm한번에 담굴수있도록
+  step_count += 50;
   delay(50);
+
   Serial.println("STATE3");
   return 1; //state 벗어나기 위해 1 return
 
@@ -190,6 +192,10 @@ int state3() { // state 3 : 엣칭완료 기다리는 중
 
 }
 int state4() { // state 4 : 올라가는 중
+
+  myStepper.step(-(one_step) * 50); //2mm한번에 담굴수있도록
+  delay(50);
+  step_count -= 50;
 
   while (step_count > 0) {
     myStepper.step(-one_step);
