@@ -160,11 +160,15 @@ int state1() { // state 1 : 내려가는 부분
 
 int state2() { // state 2 : 2미리 내려가는 중
 
-  for (int i = 0; i < 50; i++) {
+  /*
+   for (int i = 0; i < 50; i++) {
     myStepper.step(one_step);
     step_count++; //내려간거 기록
     delay(50); //TODO 내려가는 스텝에 맞게 시간 조정
   }
+  */
+  myStepper.step(one_step*50);
+  delay(50);
   Serial.println("STATE3");
   return 1; //state 벗어나기 위해 1 return
 
