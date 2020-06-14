@@ -102,12 +102,12 @@ int state0() {
     return 0;
   }
 
-  else if (digitalRead(10) == LOW) {
+  else if ((digitalRead(10) == LOW) && (voltage > 0.5)) {
     start_voltage = analogRead(A0) * 25.00 / 1024.00;
     Serial.println(start_voltage, 4);
     Serial.println("STATE1");
     return 1;
-  }
+    }
 
   else {
     myStepper.step(0);
